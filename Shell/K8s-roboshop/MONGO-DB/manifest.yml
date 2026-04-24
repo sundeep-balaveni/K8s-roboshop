@@ -64,8 +64,11 @@ type: ClusterIP
 spec:
   type: ClusterIP
   selector:
+    
+    app: mongo
     project: roboshop
-    app: 
+    environment: dev
+    purpose: poc 
 
   ports:
   - protocol: TCP
