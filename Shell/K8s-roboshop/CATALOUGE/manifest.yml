@@ -82,9 +82,8 @@ metadata:
     purpose: poc
 
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
-    app: catalouge
     project: roboshop
     environment: dev
     purpose: poc 
