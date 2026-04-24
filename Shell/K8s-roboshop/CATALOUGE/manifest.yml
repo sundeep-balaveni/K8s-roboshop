@@ -10,7 +10,7 @@ metadata:
   namespace: roboshop
 data:
   MONGO_URL: "catalouge://<catalouge-SERVER-IPADDRESS>:27017/catalogue"
-  MONGO_DB: "catalogue"
+  MONGO_DB: "true"
 
 ---
 
@@ -28,16 +28,16 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongo-deployment
+  name: catalouge-deployment
   namespace: roboshop
   labels:
-    app: mongo
+    app: catalouge
     project: roboshop
     environment: dev
     purpose: poc
 
   annotations:
-    kubernetes.io/change-cause: "v1 mongo deployment"
+    kubernetes.io/change-cause: "v1 catalouge deployment"
 
     # the namespace in which the deployment will be created 
 spec:
@@ -45,7 +45,7 @@ spec:
   selector:
     matchLabels:
       
-      app: mongo
+      app: catalouge
       project: roboshop
       environment: dev
       purpose: poc
@@ -55,7 +55,7 @@ spec:
   template:
     metadata:
       labels:
-        app: mongo
+        app: catalouge
         project: roboshop
         environment: dev
         purpose: poc
@@ -77,6 +77,7 @@ metadata:
   name: catalouge-service
   namespace: roboshop
   labels:
+    app: catalouge
     project: roboshop
     environment: dev
     purpose: poc
@@ -84,6 +85,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
+    app: catalouge
     project: roboshop
     environment: dev
     purpose: poc 
