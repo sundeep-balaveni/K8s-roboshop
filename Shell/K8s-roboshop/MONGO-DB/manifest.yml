@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mongodb
+  labels:
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  labels:
+    app: mongo
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+  annotations:
+    kubernetes.io/change-cause: "v1 mongo deployment"
+
+    # the namespace in which the deployment will be created 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      
+      app: mongo
+      project: roboshop
+      environment: dev
+      purpose: poc
+
+# the pod template
+
+  template:
+    metadata:
+      labels:
+        app: mongo
+        project: roboshop
+        environment: dev
+        purpose: poc
+    spec:
+      containers:
+      - name: mongodb
+        image: 
+        ports:
+        - containerPort: 80
+
+---
+
+#nodeport service
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: roboshop
+type: ClusterIP
+
+spec:
+  type: ClusterIP
+  selector:
+    project: roboshop
+    app: 
+
+  ports:
+  - protocol: TCP
+    port: 27017  #service port
+    targetPort: 27017 #container port
