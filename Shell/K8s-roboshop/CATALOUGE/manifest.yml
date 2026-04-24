@@ -1,0 +1,94 @@
+
+
+
+
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+  namespace: roboshop
+data:
+  MONGO_URL: "catalouge://<catalouge-SERVER-IPADDRESS>:27017/catalogue"
+  MONGO_DB: "catalogue"
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: catalouge
+  labels:
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  namespace: roboshop
+  labels:
+    app: mongo
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+  annotations:
+    kubernetes.io/change-cause: "v1 mongo deployment"
+
+    # the namespace in which the deployment will be created 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      
+      app: mongo
+      project: roboshop
+      environment: dev
+      purpose: poc
+
+# the pod template
+
+  template:
+    metadata:
+      labels:
+        app: mongo
+        project: roboshop
+        environment: dev
+        purpose: poc
+    spec:
+      containers:
+      - name: catalouge
+        image: sandeep0109/catalouge:2.2.2
+        ports:
+        - containerPort: 27017
+
+---
+
+#nodeport service
+
+
+apiVersion: v1
+kind: LoadBalancer
+metadata:
+  name: catalouge-service
+  namespace: roboshop
+  labels:
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+spec:
+  type: ClusterIP
+  selector:
+    app: catalouge
+    project: roboshop
+    environment: dev
+    purpose: poc 
+  ports:
+  - protocol: TCP
+    port: 8080  #service port
+    targetPort: 80 #container port
