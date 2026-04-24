@@ -13,6 +13,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mongo-deployment
+  namespace: roboshop
   labels:
     app: mongo
     project: roboshop
@@ -45,9 +46,9 @@ spec:
     spec:
       containers:
       - name: mongodb
-        image: 
+        image: sandeep0109/mongodb:2.2.2
         ports:
-        - containerPort: 80
+        - containerPort: 27017
 
 ---
 
@@ -57,7 +58,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service
+  name: mongodb-service
   namespace: roboshop
 type: ClusterIP
 
