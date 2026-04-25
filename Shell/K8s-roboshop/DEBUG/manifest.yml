@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug
+  namespace: roboshop
+  labels:
+    app: debug
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+spec:
+  containers:
+  - name: debug
+    image: sandeep0109/debug:1.0
+    imagePullPolicy: Always
+    command: ["sleep", "5000"]
