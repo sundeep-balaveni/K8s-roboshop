@@ -1,7 +1,6 @@
 
 
-
-
+# This manifest file contains the configuration for the catalouge application, including a ConfigMap for database configuration, a Deployment for the application, and a Service to expose it.
 
 apiVersion: v1
 kind: ConfigMap
@@ -9,7 +8,7 @@ metadata:
   name: db-config
   namespace: roboshop
 data:
-  MONGO_URL: "catalouge://<catalouge-SERVER-IPADDRESS>:27017/catalogue"
+  MONGO_URL: "catalouge://catalouge-svc:27017/catalogue"
   MONGO_DB: "true"
 
 ---
@@ -24,6 +23,8 @@ metadata:
     purpose: poc
 
 ---
+
+#deployment for catalouge application
 
 apiVersion: apps/v1
 kind: Deployment
@@ -63,8 +64,52 @@ spec:
       containers:
       - name: catalouge
         image: sandeep0109/catalouge:2.2.2
+
+# always pull the image to ensure we get the latest version of the application
+
+        imagePullPolicy: Always
         ports:
         - containerPort: 27017
+
+# resource limits and requests for the container
+
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+
+# pass the environment variables to the application using configmap
+
+        envFrom:
+        - configMapRef:
+            name: db-config
+
+
+#check the health of the application using readiness probe
+        
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          tcpSocket:
+            port: 8080
+
+
+#check the health of the application using liveness probe
+
+        livenessProbe:
+          exec:
+            command:
+              - /tmp/healthy
+          periodSeconds: 10
+          failureThreshold: 3
+        
 
 ---
 
