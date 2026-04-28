@@ -1,0 +1,142 @@
+
+
+# This manifest file contains the configuration for the user application, including a ConfigMap for database configuration, a Deployment for the application, and a Service to expose it.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+  namespace: roboshop
+data:
+  MONGO_URL: "user://user-svc:27017/user"
+  CATALOGUE_PORT: "8080"
+  REDIS_HOST: "redis://redis:6379"
+  MONGO_DB: "true"
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: user
+  labels:
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+---
+
+#deployment for user application
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-deployment
+  namespace: roboshop
+  labels:
+    app: user
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+  annotations:
+    kubernetes.io/change-cause: "v1 user deployment"
+
+    # the namespace in which the deployment will be created 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      
+      app: user
+      project: roboshop
+      environment: dev
+      purpose: poc
+
+# the pod template
+
+  template:
+    metadata:
+      labels:
+        app: user
+        project: roboshop
+        environment: dev
+        purpose: poc
+    spec:
+      containers:
+      - name: user
+        image: sandeep0109/user:latest
+
+# always pull the image to ensure we get the latest version of the application
+
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+
+# resource limits and requests for the container
+
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+
+# pass the environment variables to the application using configmap
+
+        envFrom:
+        - configMapRef:
+            name: db-config
+
+
+#check the health of the application using readiness probe
+        
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          tcpSocket:
+            port: 8080
+
+
+#check the health of the application using liveness probe
+
+        livenessProbe:
+          exec:
+            command:
+              - /tmp/healthy
+          periodSeconds: 10
+          failureThreshold: 3
+        
+
+---
+
+#nodeport service
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: roboshop
+  labels:
+    app: user
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+spec:
+  type: clusterIP
+  selector:
+    app: user
+    project: roboshop
+    environment: dev
+    purpose: poc 
+  ports:
+  - protocol: TCP
+    port: 8080  #service port
+    targetPort: 8080 #container port

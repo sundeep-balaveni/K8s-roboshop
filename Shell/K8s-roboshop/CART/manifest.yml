@@ -1,0 +1,141 @@
+
+
+# This manifest file contains the configuration for the cart application, including a ConfigMap for database configuration, a Deployment for the application, and a Service to expose it.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+  namespace: roboshop
+data:
+  CATALOGUE_HOST: "cart-svc"
+  CATALOGUE_PORT: "8080"
+  REDIS_HOST: "redis"
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cart
+  labels:
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+---
+
+#deployment for cart application
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cart-deployment
+  namespace: roboshop
+  labels:
+    app: cart
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+  annotations:
+    kubernetes.io/change-cause: "v1 cart deployment"
+
+    # the namespace in which the deployment will be created 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      
+      app: cart
+      project: roboshop
+      environment: dev
+      purpose: poc
+
+# the pod template
+
+  template:
+    metadata:
+      labels:
+        app: cart
+        project: roboshop
+        environment: dev
+        purpose: poc
+    spec:
+      containers:
+      - name: cart
+        image: sandeep0109/cart:latest
+
+# always pull the image to ensure we get the latest version of the application
+
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+
+# resource limits and requests for the container
+
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+
+# pass the environment variables to the application using configmap
+
+        envFrom:
+        - configMapRef:
+            name: db-config
+
+
+#check the health of the application using readiness probe
+        
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          tcpSocket:
+            port: 8080
+
+
+#check the health of the application using liveness probe
+
+        livenessProbe:
+          exec:
+            command:
+              - /tmp/healthy
+          periodSeconds: 10
+          failureThreshold: 3
+        
+
+---
+
+#nodeport service
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cart-service
+  namespace: roboshop
+  labels:
+    app: cart
+    project: roboshop
+    environment: dev
+    purpose: poc
+
+spec:
+  type: clusterIP
+  selector:
+    app: cart
+    project: roboshop
+    environment: dev
+    purpose: poc 
+  ports:
+  - protocol: TCP
+    port: 8080  #service port
+    targetPort: 8080 #container port
