@@ -8,7 +8,7 @@ metadata:
   name: db-config
   namespace: roboshop
 data:
-  MONGO_URL: "catalouge://catalouge-svc:27017/catalogue"
+  MONGO_URL: "mongodb://mongodb-service:27017/catalogue"
   MONGO_DB: "true"
 
 ---

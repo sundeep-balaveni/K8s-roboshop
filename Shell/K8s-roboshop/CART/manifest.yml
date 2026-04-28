@@ -45,7 +45,7 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:
+    matchLabels:         # the selector to match the labels of the pods created by this deployment
       
       app: cart
       project: roboshop
