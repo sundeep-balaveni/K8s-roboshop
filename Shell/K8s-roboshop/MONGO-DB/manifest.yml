@@ -59,7 +59,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongodb-service
-  namespace: roboshop
+  namespace: mongodb
   labels:
     project: roboshop
     environment: dev
