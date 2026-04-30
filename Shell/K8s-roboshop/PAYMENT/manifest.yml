@@ -1,6 +1,6 @@
 
 
-# This manifest file contains the configuration for the catalouge application, including a ConfigMap for database configuration, a Deployment for the application, and a Service to expose it.
+# This manifest file contains the configuration for the payment application, including a ConfigMap for database configuration, a Deployment for the application, and a Service to expose it.
 
 apiVersion: v1
 kind: ConfigMap
@@ -8,7 +8,7 @@ metadata:
   name: db-config
   namespace: roboshop
 data:
-  MONGO_URL: "mongodb://mongodb-service:27017/catalogue"
+  MONGO_URL: "mongodb://mongodb-service:27017/payment"
   MONGO_DB: "true"
 
 ---
@@ -16,7 +16,7 @@ data:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: catalogue   #why different namespace for each application? to isolate the applications and to manage the resources of each application separately
+  name: payment   #why different namespace for each application? to isolate the applications and to manage the resources of each application separately
   labels:
     project: roboshop
     environment: dev
@@ -24,21 +24,21 @@ metadata:
 
 ---
 
-#deployment for catalouge application
+#deployment for payment application
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalouge-deployment
+  name: payment-deployment
   namespace: roboshop
   labels:
-    app: catalouge
+    app: payment
     project: roboshop
     environment: dev
     purpose: poc
 
   annotations:
-    kubernetes.io/change-cause: "v1 catalouge deployment"
+    kubernetes.io/change-cause: "v1 payment deployment"
 
     # the namespace in which the deployment will be created 
 spec:
@@ -46,7 +46,7 @@ spec:
   selector:
     matchLabels:
       
-      app: catalouge
+      app: payment
       project: roboshop
       environment: dev
       purpose: poc
@@ -56,14 +56,14 @@ spec:
   template:
     metadata:
       labels:
-        app: catalouge
+        app: payment
         project: roboshop
         environment: dev
         purpose: poc
     spec:
       containers:
-      - name: catalouge
-        image: sandeep0109/catalouge:2.2.2
+      - name: payment
+        image: sandeep0109/payment:2.2.2
 
 # always pull the image to ensure we get the latest version of the application
 
@@ -119,10 +119,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: catalouge-service
+  name: payment-service
   namespace: roboshop
   labels:
-    app: catalouge
+    app: payment
     project: roboshop
     environment: dev
     purpose: poc
@@ -130,7 +130,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: catalouge
+    app: payment
     project: roboshop
     environment: dev
     purpose: poc 

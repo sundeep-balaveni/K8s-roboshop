@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   name: mongodb
   labels:
-    project: roboshop
+    project: mongodb
     environment: dev
     purpose: poc
 
@@ -13,7 +13,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mongo-deployment
-  namespace: roboshop
+  namespace: mongodb
   labels:
     app: mongo
     project: roboshop
